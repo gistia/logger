@@ -1,0 +1,15 @@
+{
+  "name": "logger",
+  "version": "0.1.0",
+  "description": "Opinionated logger on top of Winston",
+  "main": "index.js",
+  "repository": "TBD",
+  "author": "Felipe Coury",
+  "license": "MIT",
+  "dependencies": {
+    "express-winston": "^2.4.0",
+    "winston": "^2.3.1",
+    "winston-daily-rotate-file": "^1.4.6",
+    "winston-mail": "^1.3.0"
+  }
+}
