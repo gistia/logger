@@ -55,4 +55,12 @@ ${stringify(meta, null, 2)}
     transports,
     level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'test' ? 'error' : 'debug'),
   });
+
+  global.expressLogger = expressWinston.logger({
+    transports,
+    meta: true,
+    msg: 'HTTP {{req.method}} {{req.url}} {{res.statusCode}} {{res.responseTime}}ms', // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}",
+    expressFormat: true,
+    colorize: true,
+  });
 }
