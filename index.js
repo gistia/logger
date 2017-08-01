@@ -1,6 +1,6 @@
 if (!global.logger) {
   const winston = require('winston');
-  require('winston-daily-rotate-file');
+  const expressWinston = require('express-winston')
 
   const transports = [
     new (winston.transports.Console)({
@@ -11,6 +11,7 @@ if (!global.logger) {
   ];
 
   if (process.env.LOG_FILE) {
+    require('winston-daily-rotate-file');
     transports.push(new winston.transports.DailyRotateFile({
       filename: process.env.LOG_FILE,
       datePattern: 'yyyy-MM-dd',
