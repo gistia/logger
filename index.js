@@ -12,6 +12,7 @@ if (!global.logger) {
 
   if (process.env.LOG_FILE) {
     require('winston-daily-rotate-file');
+    console.log('[logger] File enabled. Prefix:', process.env.LOG_FILE, 'JSON:', process.env.LOG_JSON ? 'yes' : 'no');
     transports.push(new winston.transports.DailyRotateFile({
       filename: process.env.LOG_FILE,
       datePattern: 'yyyy-MM-dd',
@@ -21,6 +22,7 @@ if (!global.logger) {
 
   if (process.env.LOG_LOGGLY_SUBDOMAIN) {
     require('winston-loggly-bulk');
+    console.log('[logger] Loggly enabled. Subdomain:', process.env.LOG_LOGGLY_SUBDOMAIN, 'Tags:', process.env.LOG_LOGGLY_TAGS, 'TokenSet:', process.env.LOG_LOGGLY_TOKEN ? 'yes' : 'no');
     const tags = (process.env.LOG_LOGGLY_TAGS || '').split(',');
     transports.push(new winston.transports.Loggly({
       token: process.env.LOG_LOGGLY_TOKEN,
@@ -32,6 +34,7 @@ if (!global.logger) {
 
   if (process.env.EMAIL_TO) {
     const stringify = require('json-stringify-safe');
+    console.log('[logger] Email enabled. To:', process.env.EMAIL_TO, 'Host:', process.env.EMAIL_SMTP_HOST);
     require('winston-mail').Mail;
     transports.push(new winston.transports.Mail({
       level: 'error',
