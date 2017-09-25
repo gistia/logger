@@ -1,6 +1,6 @@
 if (!global.logger) {
   const winston = require('winston');
-  const expressWinston = require('express-winston')
+  const expressWinston = require('express-winston');
 
   const transports = [
     new (winston.transports.Console)({
@@ -16,6 +16,17 @@ if (!global.logger) {
       filename: process.env.LOG_FILE,
       datePattern: 'yyyy-MM-dd',
       json: !!process.env.LOG_JSON,
+    }));
+  }
+
+  if (process.env.LOG_LOGGLY_SUBDOMAIN) {
+    require('winston-loggly-bulk');
+    const tags = (process.env.LOG_LOGGLY_TAGS || '').split(',');
+    transports.push(new winston.transports.Loggly({
+      token: process.env.LOG_LOGGLY_TOKEN,
+      subdomain: process.env.LOG_LOGGLY_SUBDOMAIN,
+      tags,
+      json: true,
     }));
   }
 
