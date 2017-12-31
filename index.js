@@ -1,6 +1,8 @@
 if (!global.logger) {
   const winston = require('winston');
   const expressWinston = require('express-winston');
+  const _ = require('lodash');
+  const CircularJSON = require('circular-json');
 
   const transports = [
     new (winston.transports.Console)({
@@ -70,6 +72,32 @@ ${stringify(meta, null, 2)}
     transports,
     level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'test' ? 'error' : 'debug'),
   });
+
+  function remove(obj, keys) {
+    if (_.isArray(obj)) { return obj.forEach(obj => remove(obj, keys)); }
+
+    for (prop in obj) {
+      keys.forEach(key => {
+        const raw = key.split('.')[0];
+        if (prop === raw) {
+          obj[raw] = undefined;
+          delete obj[raw];
+        } else if (_.isArray(obj[raw])) {
+          obj[raw].forEach(obj => remove(obj, keys));
+        } else if (_.isObject(obj[raw])) {
+          remove(obj[raw], keys);
+        }
+      });
+    }
+  }
+
+  global.logger.log = function() {
+    const args = arguments;
+    const last = JSON.parse(CircularJSON.stringify(args[args.length-1]));
+    remove(last, ['client', '_id._bsontype']);
+    args[args.length-1] = last;
+    winston.Logger.prototype.log.apply(this, args);
+  };
 
   global.expressLogger = expressWinston.logger({
     transports,
