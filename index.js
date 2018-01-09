@@ -38,6 +38,7 @@ if (!global.logger) {
     console.log('[logger] Sentry enabled. Subdomain:', process.env.LOG_SENTRY_DSN, 'Tags:', process.env.LOG_SENTRY_TAGS);
     const Sentry = require('winston-sentry');
     transports.push(new Sentry({
+      level: 'error',
       dsn: process.env.LOG_SENTRY_DSN,
       tags: { key: process.env.LOG_SENTRY_TAGS },
       patchGlobal: true,
