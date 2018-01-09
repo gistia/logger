@@ -34,6 +34,16 @@ if (!global.logger) {
     }));
   }
 
+  if (process.env.LOG_SENTRY_DSN) {
+    console.log('[logger] Sentry enabled. Subdomain:', process.env.LOG_SENTRY_DSN, 'Tags:', process.env.LOG_SENTRY_TAGS);
+    const Sentry = require('winston-sentry');
+    transports.push(new Sentry({
+      dsn: process.env.LOG_SENTRY_DSN,
+      tags: { key: process.env.LOG_SENTRY_TAGS },
+      patchGlobal: true,
+    }));
+  }
+
   if (process.env.EMAIL_TO) {
     const stringify = require('json-stringify-safe');
     console.log('[logger] Email enabled. To:', process.env.EMAIL_TO, 'Host:', process.env.EMAIL_SMTP_HOST);
