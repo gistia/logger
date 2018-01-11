@@ -100,12 +100,15 @@ ${stringify(meta, null, 2)}
         }
       });
     }
+    return obj;
   }
 
   global.logger.log = function() {
     const args = arguments;
-    const last = JSON.parse(CircularJSON.stringify(args[args.length-1]));
-    remove(last, ['client', '_id._bsontype']);
+    const lastArgument = args[args.length-1];
+    const last = _.isObject(lastArgument) ?
+      remove(JSON.parse(CircularJSON.stringify(lastArgument)), ['client', '_id._bsontype']) :
+      lastArgument;
     args[args.length-1] = last;
     winston.Logger.prototype.log.apply(this, args);
   };
