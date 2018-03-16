@@ -4,13 +4,26 @@ if (!global.logger) {
   const _ = require('lodash');
   const CircularJSON = require('circular-json');
 
-  const transports = [
-    new (winston.transports.Console)({
-      colorize: true,
+  const transports = [];
+
+  if (process.env.NODE_ENV === 'development') {
+    transports.push(new (winston.transports.Console)({
       timestamp: true,
+      colorize: true,
       prettyPrint: true,
-    }),
-  ];
+    }));
+  }
+
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    require('winston-syslog');
+    transports.push(new (winston.transports.Syslog)({
+      app_name: process.env.APP_NAME,
+      host: 'localhost',
+      port: 514,
+      protocol: 'unix',
+      path: '/var/run/syslog'
+    }));
+  }
 
   if (process.env.LOG_FILE) {
     require('winston-daily-rotate-file');
