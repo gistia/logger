@@ -14,7 +14,7 @@ if (!global.logger) {
     }));
   }
 
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV && process.env.NODE_ENV !== 'development') {
     require('winston-syslog');
     transports.push(new (winston.transports.Syslog)({
       app_name: process.env.APP_NAME,
