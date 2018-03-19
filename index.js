@@ -23,7 +23,7 @@ if (!global.logger) {
       host: 'localhost',
       port: 514,
       protocol: 'unix',
-      path: '/var/run/syslog'
+      path: '/dev/log'
     }));
   }
 
