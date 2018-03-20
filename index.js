@@ -6,10 +6,10 @@ if (!global.logger) {
 
   const transports = [];
 
-  if (process.env.LOGGER_APP_NAME) {
+  if (process.env.LOGGER_SYSLOG_APP_NAME) {
     require('winston-syslog');
     transports.push(new (winston.transports.Syslog)({
-      app_name: process.env.LOGGER_APP_NAME,
+      app_name: process.env.LOGGER_SYSLOG_APP_NAME,
       host: process.env.LOGGER_SYSLOG_HOST || 'localhost',
       port: process.env.LOGGER_SYSLOG_PORT || 514,
       protocol: process.LOGGER_SYSLOG_PROTOCOL || 'unix',
