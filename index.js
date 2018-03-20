@@ -6,24 +6,14 @@ if (!global.logger) {
 
   const transports = [];
 
-  if (!process.env.NODE_ENV ||
-    process.env.NODE_ENV === 'development' ||
-    process.env.NODE_ENV === 'test') {
-    transports.push(new (winston.transports.Console)({
-      timestamp: true,
-      colorize: true,
-      prettyPrint: true,
-    }));
-  }
-
-  if (process.env.NODE_ENV && process.env.NODE_ENV === 'production') {
+  if (process.env.logger_app_name) {
     require('winston-syslog');
     transports.push(new (winston.transports.Syslog)({
-      app_name: process.env.APP_NAME,
-      host: 'localhost',
-      port: 514,
-      protocol: 'unix',
-      path: '/dev/log'
+      app_name: process.env.LOGGER_APP_NAME,
+      host: process.env.LOGGER_SYSLOG_HOST || 'localhost',
+      port: process.env.LOGGER_SYSLOG_PORT || 514,
+      protocol: process.LOGGER.APP_SYSLOG_PROTOCOL || 'unix',
+      path: process.env.LOGGER_SYSLOG_PATH || '/dev/log'
     }));
   }
 
@@ -93,6 +83,18 @@ ${stringify(meta, null, 2)}
       },
     }));
   }
+
+  if (transports.length == 0
+    || process.env.NODE_ENV === 'development'
+    || process.env.NODE_ENV === 'test') {
+    transports.push(new (winston.transports.Console)({
+      timestamp: true,
+      colorize: true,
+      prettyPrint: true,
+    }));
+  }
+
+
 
   global.logger = new (winston.Logger)({
     transports,
