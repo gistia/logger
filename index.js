@@ -6,7 +6,7 @@ if (!global.logger) {
 
   const transports = [];
 
-  if (process.env.logger_app_name) {
+  if (process.env.LOGGER_APP_NAME) {
     require('winston-syslog');
     transports.push(new (winston.transports.Syslog)({
       app_name: process.env.LOGGER_APP_NAME,
