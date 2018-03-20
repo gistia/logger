@@ -13,7 +13,9 @@ if (!global.logger) {
       host: process.env.LOGGER_SYSLOG_HOST || 'localhost',
       port: process.env.LOGGER_SYSLOG_PORT || 514,
       protocol: process.LOGGER_SYSLOG_PROTOCOL || 'unix',
-      path: process.env.LOGGER_SYSLOG_PATH || '/dev/log'
+      path: process.env.LOGGER_SYSLOG_PATH || '/dev/log',
+      type: process.env.LOGGER_SYSLOG_TYPE || 'BSD',
+      oel: process.env.LOGGER_SYSLOG_OEL || '\n'
     }));
   }
 
