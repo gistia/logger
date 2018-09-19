@@ -105,7 +105,6 @@ ${stringify(meta, null, 2)}
 
   function remove(obj, keys) {
     if (_.isArray(obj)) { return obj.forEach(obj => remove(obj, keys)); }
-
     for (prop in obj) {
       keys.forEach(key => {
         const raw = key.split('.')[0];
@@ -120,13 +119,14 @@ ${stringify(meta, null, 2)}
       });
     }
     return obj;
-  }
+  };
 
   global.logger.log = function() {
     const args = arguments;
     const lastArgument = args[args.length-1];
-    const last = _.isObject(lastArgument) ?
-      remove(JSON.parse(CircularJSON.stringify(lastArgument)), ['client', '_id._bsontype']) :
+    const shouldCast = _.isObject(lastArgument) && (!_.isError(lastArgument) || lastArgument.response );
+    const last = shouldCast ?
+      remove(JSON.parse(CircularJSON.stringify(lastArgument)), ['client', '_id._bsontype', 'request']) :
       lastArgument;
     args[args.length-1] = last;
     winston.Logger.prototype.log.apply(this, args);
