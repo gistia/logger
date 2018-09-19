@@ -124,7 +124,7 @@ ${stringify(meta, null, 2)}
   global.logger.log = function() {
     const args = arguments;
     const lastArgument = args[args.length-1];
-    const shouldCast = _.isObject(lastArgument) && (!_.isError(lastArgument) || lastArgument.response );
+    const shouldCast = _.isObject(lastArgument) && (!_.isError(lastArgument) || lastArgument.config );
     const last = shouldCast ?
       remove(JSON.parse(CircularJSON.stringify(lastArgument)), ['client', '_id._bsontype', 'request']) :
       lastArgument;
