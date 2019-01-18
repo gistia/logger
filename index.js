@@ -1,8 +1,8 @@
 if (!global.logger) {
-  const winston = require('winston');
+  const { createLogger, format, transports } = require('winston');
   const expressWinston = require('express-winston');
   const _ = require('lodash');
-  const CircularJSON = require('circular-json');
+  const { stringify } = require('flatted/esm');
 
   const transports = [];
 
@@ -29,28 +29,28 @@ if (!global.logger) {
     }));
   }
 
-  if (process.env.LOG_LOGGLY_SUBDOMAIN) {
-    require('winston-loggly-bulk');
-    console.log('[logger] Loggly enabled. Subdomain:', process.env.LOG_LOGGLY_SUBDOMAIN, 'Tags:', process.env.LOG_LOGGLY_TAGS, 'TokenSet:', process.env.LOG_LOGGLY_TOKEN ? 'yes' : 'no');
-    const tags = (process.env.LOG_LOGGLY_TAGS || '').split(',');
-    transports.push(new winston.transports.Loggly({
-      token: process.env.LOG_LOGGLY_TOKEN,
-      subdomain: process.env.LOG_LOGGLY_SUBDOMAIN,
-      tags,
-      json: true,
-    }));
-  }
+  // if (process.env.LOG_LOGGLY_SUBDOMAIN) {
+  //   require('winston-loggly-bulk');
+  //   console.log('[logger] Loggly enabled. Subdomain:', process.env.LOG_LOGGLY_SUBDOMAIN, 'Tags:', process.env.LOG_LOGGLY_TAGS, 'TokenSet:', process.env.LOG_LOGGLY_TOKEN ? 'yes' : 'no');
+  //   const tags = (process.env.LOG_LOGGLY_TAGS || '').split(',');
+  //   transports.push(new winston.transports.Loggly({
+  //     token: process.env.LOG_LOGGLY_TOKEN,
+  //     subdomain: process.env.LOG_LOGGLY_SUBDOMAIN,
+  //     tags,
+  //     json: true,
+  //   }));
+  // }
 
-  if (process.env.LOG_SENTRY_DSN) {
-    console.log('[logger] Sentry enabled. Subdomain:', process.env.LOG_SENTRY_DSN, 'Tags:', process.env.LOG_SENTRY_TAGS);
-    const Sentry = require('winston-sentry');
-    transports.push(new Sentry({
-      level: 'error',
-      dsn: process.env.LOG_SENTRY_DSN,
-      tags: { key: process.env.LOG_SENTRY_TAGS },
-      patchGlobal: true,
-    }));
-  }
+  // if (process.env.LOG_SENTRY_DSN) {
+  //   console.log('[logger] Sentry enabled. Subdomain:', process.env.LOG_SENTRY_DSN, 'Tags:', process.env.LOG_SENTRY_TAGS);
+  //   const Sentry = require('winston-sentry');
+  //   transports.push(new Sentry({
+  //     level: 'error',
+  //     dsn: process.env.LOG_SENTRY_DSN,
+  //     tags: { key: process.env.LOG_SENTRY_TAGS },
+  //     patchGlobal: true,
+  //   }));
+  // }
 
   if (process.env.EMAIL_TO) {
     const stringify = require('json-stringify-safe');
@@ -96,9 +96,11 @@ ${stringify(meta, null, 2)}
     }));
   }
 
-
-
-  global.logger = new (winston.Logger)({
+  global.logger = createLogger({
+    format: format.combine(
+      format.splat(),
+      format.simple()
+    ),
     transports,
     level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'test' ? 'error' : 'debug'),
   });
@@ -126,7 +128,7 @@ ${stringify(meta, null, 2)}
     const lastArgument = args[args.length-1];
     const shouldCast = _.isObject(lastArgument) && (!_.isError(lastArgument) || lastArgument.config );
     const last = shouldCast ?
-      remove(JSON.parse(CircularJSON.stringify(lastArgument)), ['client', '_id._bsontype', 'request']) :
+      remove(JSON.parse(stringify(lastArgument)), ['client', '_id._bsontype', 'request']) :
       lastArgument;
     args[args.length-1] = last;
     winston.Logger.prototype.log.apply(this, args);
@@ -134,6 +136,10 @@ ${stringify(meta, null, 2)}
 
   global.expressLogger = expressWinston.logger({
     transports,
+    format: format.combine(
+      format.colorize(),
+      format.json()
+    ),
     meta: true,
     msg: 'HTTP {{req.method}} {{req.url}} {{res.statusCode}} {{res.responseTime}}ms', // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}",
     expressFormat: true,
