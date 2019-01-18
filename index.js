@@ -1,14 +1,15 @@
 if (!global.logger) {
-  const { createLogger, format, transports } = require('winston');
+  const winston = require('winston');
+  const { createLogger, format, transports } = winston;
   const expressWinston = require('express-winston');
   const _ = require('lodash');
-  const { stringify } = require('flatted/esm');
+  const { stringify } = require('flatted/cjs');
 
-  const transports = [];
+  const activeTransports = [];
 
   if (process.env.LOGGER_SYSLOG_APP_NAME) {
     require('winston-syslog');
-    transports.push(new (winston.transports.Syslog)({
+    activeTransports.push(new (transports.Syslog)({
       app_name: process.env.LOGGER_SYSLOG_APP_NAME,
       host: process.env.LOGGER_SYSLOG_HOST || 'localhost',
       port: process.env.LOGGER_SYSLOG_PORT || 514,
@@ -22,7 +23,7 @@ if (!global.logger) {
   if (process.env.LOG_FILE) {
     require('winston-daily-rotate-file');
     console.log('[logger] File enabled. Prefix:', process.env.LOG_FILE, 'JSON:', process.env.LOG_JSON ? 'yes' : 'no');
-    transports.push(new winston.transports.DailyRotateFile({
+    activeTransports.push(new transports.DailyRotateFile({
       filename: process.env.LOG_FILE,
       datePattern: 'yyyy-MM-dd',
       json: !!process.env.LOG_JSON,
@@ -56,7 +57,7 @@ if (!global.logger) {
     const stringify = require('json-stringify-safe');
     console.log('[logger] Email enabled. To:', process.env.EMAIL_TO, 'Host:', process.env.EMAIL_SMTP_HOST);
     require('winston-mail').Mail;
-    transports.push(new winston.transports.Mail({
+    activeTransports.push(new transports.Mail({
       level: 'error',
       to: process.env.EMAIL_TO,
       host: process.env.EMAIL_SMTP_HOST,
@@ -86,10 +87,10 @@ ${stringify(meta, null, 2)}
     }));
   }
 
-  if (transports.length == 0
+  if (activeTransports.length == 0
     || process.env.NODE_ENV === 'development'
     || process.env.NODE_ENV === 'test') {
-    transports.push(new (winston.transports.Console)({
+    activeTransports.push(new (transports.Console)({
       timestamp: true,
       colorize: true,
       prettyPrint: true,
@@ -98,12 +99,15 @@ ${stringify(meta, null, 2)}
 
   global.logger = createLogger({
     format: format.combine(
+      format.colorize(),
       format.splat(),
       format.simple()
     ),
-    transports,
+    transports: activeTransports,
     level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'test' ? 'error' : 'debug'),
+    levels: process.env.LOGGER_SYSLOG_APP_NAME ? winston.config.syslog.levels : undefined
   });
+
 
   function remove(obj, keys) {
     if (_.isArray(obj)) { return obj.forEach(obj => remove(obj, keys)); }
@@ -123,6 +127,7 @@ ${stringify(meta, null, 2)}
     return obj;
   };
 
+  const _log = global.logger.log;
   global.logger.log = function() {
     const args = arguments;
     const lastArgument = args[args.length-1];
@@ -131,11 +136,11 @@ ${stringify(meta, null, 2)}
       remove(JSON.parse(stringify(lastArgument)), ['client', '_id._bsontype', 'request']) :
       lastArgument;
     args[args.length-1] = last;
-    winston.Logger.prototype.log.apply(this, args);
+    _log.apply(this, args);
   };
 
   global.expressLogger = expressWinston.logger({
-    transports,
+    transports: activeTransports,
     format: format.combine(
       format.colorize(),
       format.json()
