@@ -14,6 +14,6 @@
     "winston": "3.1.0",
     "winston-daily-rotate-file": "3.6.0",
     "winston-mail": "1.5.2",
-    "winston-syslog": "https://github.com/winstonjs/winston-syslog.git#649ba4456e401f40300da7a961db7b49fb499ab9"
+    "winston-syslog": "2.1.0"
   }
 }

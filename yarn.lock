@@ -405,9 +405,10 @@ winston-mail@1.5.2:
     emailjs "^1.0.8"
     mustache "^2.2.1"
 
-"winston-syslog@https://github.com/winstonjs/winston-syslog.git#649ba4456e401f40300da7a961db7b49fb499ab9":
-  version "2.0.0"
-  resolved "https://github.com/winstonjs/winston-syslog.git#649ba4456e401f40300da7a961db7b49fb499ab9"
+winston-syslog@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/winston-syslog/-/winston-syslog-2.1.0.tgz#0d4ff445b0e6f153b201e1c209c88824932df9bd"
+  integrity sha512-y6wHm7vd99tcpIar6fNM5Widx7Kemf2iguGLC9wty351wqQU9LewRaMraj3FvO2xPJF6P4a4BuSN3jGx/tnIqg==
   dependencies:
     cycle "^1.0.3"
     glossy "^0.1.7"
